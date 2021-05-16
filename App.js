@@ -1,13 +1,45 @@
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Provider, useSelector, useDispatch } from 'react-redux';
+import { StyleSheet, SafeAreaView } from 'react-native';
 
-export default function App() {
+import configureStore from './assets/store/index';
+import NavBar from './assets/components/NavBar/index';
+import AbsoluteWrapper from './assets/components/AbsoluteWrapper';
+import Home from './assets/components/Home';
+import { restoreCSRF } from './assets/store/csrfetch';
+import { RestoreUser } from './assets/store/session';
+import { SetCurrent } from './assets/store/appPage';
+
+const store = configureStore();
+
+function WrappedApp () {
+  const dispatch = useDispatch();
+
+  const { Current } = useSelector(state => state.appPage);
+
+  useEffect(() => {
+    restoreCSRF();
+    dispatch(RestoreUser());
+    dispatch(SetCurrent(Home));
+  }, [dispatch]);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style='auto' />
+      <AbsoluteWrapper>
+        {Current && <Current />}
+      </AbsoluteWrapper>
+      <NavBar />
+    </SafeAreaView>
+  );
+}
+
+export default function App () {
+  return (
+    <Provider store={store}>
+      <WrappedApp />
+    </Provider>
   );
 }
 
@@ -16,6 +48,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center'
+  }
 });
