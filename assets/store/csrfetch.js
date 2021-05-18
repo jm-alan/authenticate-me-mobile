@@ -6,8 +6,14 @@ const setHeaders = async headers => {
   headers['XSRF-Token'] = await AsyncStorage.getItem('token');
 };
 
+const validateContext = context => {
+  if (!context || context === globalThis) {
+    throw new TypeError('Invalid context for invocation. Do not destructure csrfetch methods');
+  } else return true;
+};
+
 const wrappedFetch = async (url, ...args) => {
-  url = `${this.baseUrl}${url}?`;
+  url = `${REACT_NATIVE_BASE_URL}${url}?`;
   const options = {};
   if (
     typeof args[0] === 'object' &&
@@ -21,36 +27,38 @@ const wrappedFetch = async (url, ...args) => {
     Array.isArray(args[0]) &&
     args.length === 1
   ) throw new TypeError('GET request queries must be an object of the form { query: value }');
-  else if (args.length > 1);
+  else if (args.length > 1) {
+    const method = args[0];
+    const body = JSON.stringify(args[1]);
+    const headers = args[2];
+    setHeaders(headers);
+    options.method = method;
+    options.body = body;
+    options.headers = headers;
+  }
   return await (await window.fetch(url, options)).json();
 };
 
 export default {
-  baseUrl: REACT_NATIVE_BASE_URL,
   async get (url, queries = {}) {
-    url = `${this.baseUrl}${url}?`;
-    for (const query in queries) url += `&${query}=${queries[query]}`;
-    return await (await window.fetch(url)).json();
+    return await (async () => validateContext(this) &&
+      await wrappedFetch(url, queries))();
   },
   async post (url, body, headers = {}) {
-    url = `${this.baseUrl}${url}`;
-    await setHeaders(headers);
-    return await (await window.fetch(url, { method: 'POST', headers, body })).json();
+    return await (async () => validateContext(this) &&
+      await wrappedFetch(url, 'POST', body, headers))();
   },
   async put (url, body, headers = {}) {
-    url = `${this.baseUrl}${url}`;
-    await setHeaders(headers);
-    return await (await window.fetch(url, { method: 'PUT', headers, body })).json();
+    return await (async () => validateContext(this) &&
+      await wrappedFetch(url, 'PUT', body, headers))();
   },
   async patch (url, body, headers = {}) {
-    url = `${this.baseUrl}${url}`;
-    await setHeaders(headers);
-    return await (await window.fetch(url, { method: 'PATCH', headers, body })).json();
+    return await (async () => validateContext(this) &&
+      await wrappedFetch(url, 'PATCH', body, headers))();
   },
   async delete (url, body, headers = {}) {
-    url = `${this.baseUrl}${url}`;
-    await setHeaders(headers);
-    return await (await window.fetch(url, { method: 'POST', headers, body })).json();
+    return await (async () => validateContext(this) &&
+      await wrappedFetch(url, 'DELETE', body, headers))();
   }
 };
 
