@@ -1,5 +1,4 @@
 import csrfetch from './csrfetch';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const USER = 'session/user';
 
@@ -9,34 +8,28 @@ const setSession = (user = null) => ({
 });
 
 export const RestoreUser = () => async dispatch => {
-  const { user, mobileToken } = await csrfetch.get('/api/session/', {
-    mobileToken: await AsyncStorage.getItem('mobileToken')
-  });
-  await AsyncStorage.setItem('mobileToken', mobileToken || '');
+  const { user } = await csrfetch.get('/api/session/', {});
   dispatch(setSession(user));
 };
 
 export const LogIn = userInfo => async dispatch => {
-  const { user, mobileToken } = await csrfetch.post(
+  const { user } = await csrfetch.post(
     '/api/session/',
     JSON.stringify(userInfo)
   );
-  await AsyncStorage.setItem('mobileToken', mobileToken || '');
   dispatch(setSession(user));
 };
 
 export const SignUp = userInfo => async dispatch => {
-  const { user, mobileToken } = await csrfetch.post(
+  const { user } = await csrfetch.post(
     '/api/users/',
     JSON.stringify(userInfo)
   );
-  await AsyncStorage.setItem('mobileToken', mobileToken || '');
   dispatch(setSession(user));
 };
 
 export const LogOut = () => async dispatch => {
   await csrfetch.delete('/api/session/');
-  await AsyncStorage.removeItem('mobileToken');
   dispatch(setSession());
 };
 

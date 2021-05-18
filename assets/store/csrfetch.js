@@ -17,7 +17,7 @@ export default {
     if (this === undefined || this === globalThis) {
       throw new TypeError('Invalid context for invocation. Do not destructure csrfetch methods.');
     }
-    url = `${this.baseUrl}${url}?mobileToken=${await AsyncStorage.getItem('sessionToken')}`;
+    url = `${this.baseUrl}${url}`;
     headers['Content-Type'] || (headers['Content-Type'] = 'application/json');
     headers['XSRF-Token'] = await AsyncStorage.getItem('token');
     return await (await window.fetch(url, { method: 'POST', headers, body })).json();
@@ -26,7 +26,7 @@ export default {
     if (this === undefined || this === globalThis) {
       throw new TypeError('Invalid context for invocation. Do not destructure csrfetch methods.');
     }
-    url = `${this.baseUrl}${url}?mobileToken=${await AsyncStorage.getItem('sessionToken')}`;
+    url = `${this.baseUrl}${url}`;
     headers['Content-Type'] || (headers['Content-Type'] = 'application/json');
     headers['XSRF-Token'] = await AsyncStorage.getItem('token');
     return await (await window.fetch(url, { method: 'PUT', headers, body })).json();
@@ -35,7 +35,7 @@ export default {
     if (this === undefined || this === globalThis) {
       throw new TypeError('Invalid context for invocation. Do not destructure csrfetch methods.');
     }
-    url = `${this.baseUrl}${url}?mobileToken=${await AsyncStorage.getItem('sessionToken')}`;
+    url = `${this.baseUrl}${url}`;
     headers['Content-Type'] || (headers['Content-Type'] = 'application/json');
     headers['XSRF-Token'] = await AsyncStorage.getItem('token');
     return await (await window.fetch(url, { method: 'PATCH', headers, body })).json();
@@ -44,7 +44,7 @@ export default {
     if (this === undefined || this === globalThis) {
       throw new TypeError('Invalid context for invocation. Do not destructure csrfetch methods.');
     }
-    url = `${this.baseUrl}${url}?mobileToken=${await AsyncStorage.getItem('sessionToken')}`;
+    url = `${this.baseUrl}${url}`;
     headers['Content-Type'] || (headers['Content-Type'] = 'application/json');
     headers['XSRF-Token'] = await AsyncStorage.getItem('token');
     return await (await window.fetch(url, { method: 'POST', headers, body })).json();
