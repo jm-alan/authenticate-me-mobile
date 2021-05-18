@@ -13,18 +13,12 @@ export const RestoreUser = () => async dispatch => {
 };
 
 export const LogIn = userInfo => async dispatch => {
-  const { user } = await csrfetch.post(
-    '/api/session/',
-    JSON.stringify(userInfo)
-  );
+  const { user } = await csrfetch.post('/api/session/', userInfo);
   dispatch(setSession(user));
 };
 
 export const SignUp = userInfo => async dispatch => {
-  const { user } = await csrfetch.post(
-    '/api/users/',
-    JSON.stringify(userInfo)
-  );
+  const { user } = await csrfetch.post('/api/users/', userInfo);
   dispatch(setSession(user));
 };
 
