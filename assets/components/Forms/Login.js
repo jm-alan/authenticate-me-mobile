@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { TextInput, StyleSheet } from 'react-native';
+import { TextInput } from 'react-native';
 
 import Form from './index';
 import { LogIn } from '../../store/session';
@@ -32,9 +32,12 @@ export default function LoginForm () {
   }
 
   return (
-    <Form errors={errors}>
+    <Form
+      errors={errors}
+      titleText='Log In'
+    >
       <TextInput
-        style={styles.input}
+        style={{}}
         blurOnSubmit={false}
         value={identification}
         ref={identificationRef}
@@ -43,9 +46,9 @@ export default function LoginForm () {
         onSubmitEditing={() => passwordRef.current.focus()}
       />
       <TextInput
+        style={{}}
         value={password}
         ref={passwordRef}
-        style={styles.input}
         onSubmitEditing={onSubmit}
         placeholder='Password'
         secureTextEntry
@@ -54,15 +57,3 @@ export default function LoginForm () {
     </Form>
   );
 }
-
-const styles = StyleSheet.create({
-  input: {
-    width: '80%',
-    height: 50,
-    marginBottom: 20,
-    borderWidth: 1,
-    fontSize: 30,
-    paddingLeft: 10,
-    paddingRight: 10
-  }
-});
