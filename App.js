@@ -13,7 +13,7 @@ import { SetCurrent } from './assets/store/appPage';
 
 const store = configureStore();
 
-function WrappedApp () {
+function App () {
   const dispatch = useDispatch();
 
   const { Current } = useSelector(state => state.appPage);
@@ -35,10 +35,10 @@ function WrappedApp () {
   );
 }
 
-export default function App () {
+export default function Root () {
   return (
     <Provider store={store}>
-      <WrappedApp />
+      <App />
     </Provider>
   );
 }
