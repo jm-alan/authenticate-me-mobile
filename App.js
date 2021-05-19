@@ -19,13 +19,8 @@ function WrappedApp () {
   const { Current } = useSelector(state => state.appPage);
 
   useEffect(() => {
-    try {
-      restoreCSRF();
-      dispatch(RestoreUser());
-    } catch (err) {}
-  }, [dispatch]);
-
-  useEffect(() => {
+    restoreCSRF();
+    dispatch(RestoreUser());
     dispatch(SetCurrent(Home));
   }, [dispatch]);
 

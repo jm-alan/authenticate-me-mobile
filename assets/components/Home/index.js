@@ -5,10 +5,10 @@ import { View, Text, StyleSheet } from 'react-native';
 export default function Home () {
   const user = useSelector(state => state.session.user);
 
-  return user && (
+  return (
     <View style={styles.container}>
       <Text style={styles.basicText}>
-        Hello, {user.username}!
+        Hello, {(user && user.username) || 'new friend'}!
       </Text>
     </View>
   );
