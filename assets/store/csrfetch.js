@@ -6,6 +6,11 @@ const setHeaders = async headers => {
   headers['XSRF-Token'] = await AsyncStorage.getItem('token');
 };
 
+// This function is not as important as it looks.
+// If you destructure the csrfetch object, there's a chance
+// you'll try to use 'delete' as a function, which is a reserved
+// JS keyword and therefore illegal to declare. Just preempting
+// that to avoid the habit.
 const validateContext = context => {
   if (!context || context === globalThis) {
     throw new TypeError('Invalid context for invocation. Do not destructure csrfetch methods');
@@ -23,9 +28,10 @@ const wrappedFetch = async (url, ...args) => {
     const queries = args[0];
     for (const query in queries) url += `&${query}=${queries[query]}`;
   } else if (
-    typeof args[0] === 'object' &&
-    Array.isArray(args[0]) &&
-    args.length === 1
+    typeof args[0] !== 'object' || (
+      Array.isArray(args[0]) &&
+      args.length === 1
+    )
   ) throw new TypeError('GET request queries must be an object of the form { query: value }');
   else if (args.length > 1) {
     const method = args[0];

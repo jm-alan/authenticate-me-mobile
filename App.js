@@ -94,27 +94,23 @@ Object.deepEq = function ($, _) {
   for (const $_ in $$) {
     if (
       // If, at the same key, the two values are not of the same type, or
-      typeof $$[+$_] !== typeof __[+$_] ||
+      typeof $$[+$_] !== typeof __[+$_] || (
       // If they are functions which, when cast to string, differ, or
-      (
         typeof $$[+$_] === 'function' &&
         $$[+$_].toString() !== __[+$_].toString()
-      ) ||
+      ) || (
       // If they are of the same type and not 'object' or 'function' type, but fail strict
       // equality, or
-      (
         typeof $$[+$_] !== 'object' &&
         typeof $$[+$_] !== 'function' &&
         $$[+$_] !== __[+$_]
-      ) ||
+      ) || (
       // if they are objects which are not null and not recursively deeply equal, or
-      (
         typeof $$[+$_] === 'object' &&
         $$[+$_] !== null &&
         !Object.deepEq($$[+$_], __[+$_])
-      ) ||
-      // if one is null and the other is not
-      ($$[+$_] === null && $$[+$_] !== __[+$_])
+        // if one is null and the other is not
+      ) || ($$[+$_] === null && $$[+$_] !== __[+$_])
       // then fail
     ) return false;
   }
