@@ -7,7 +7,7 @@ import configureStore from './assets/store/index';
 import NavBar from './assets/components/NavBar/index';
 import AbsoluteWrapper from './assets/components/AbsoluteWrapper';
 import Home from './assets/components/Home';
-import { restoreCSRF } from './assets/store/csrfetch';
+import csrfetch from './assets/store/csrfetch';
 import { RestoreUser } from './assets/store/session';
 import { SetCurrent } from './assets/store/appPage';
 
@@ -19,7 +19,7 @@ function App () {
   const Current = useSelector(state => state.appPage.Current);
 
   useEffect(() => {
-    restoreCSRF();
+    csrfetch.restoreCSRF();
     dispatch(RestoreUser());
     dispatch(SetCurrent(Home));
   }, [dispatch]);
