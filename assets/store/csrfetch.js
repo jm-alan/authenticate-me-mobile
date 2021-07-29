@@ -1,79 +1,69 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_NATIVE_BASE_URL } from '@env';
 
-const setHeaders = async headers => {
-  headers['Content-Type'] || (headers['Content-Type'] = 'application/json');
-  headers['XSRF-Token'] = await AsyncStorage.getItem('token');
-};
-
-// This function is not as important as it looks.
-// If you destructure the csrfetch object, there's a chance
-// you'll try to use 'delete' as a function, which is a reserved
-// JS keyword and therefore illegal to declare. Just preempting
-// that to avoid the habit.
-const validateContext = context => {
-  if (!context || context === globalThis) {
-    throw new TypeError('Invalid context for invocation. Do not destructure csrfetch methods');
-  } else return true;
-};
-
-const wrappedFetch = async (url, ...args) => {
-  url = `${REACT_NATIVE_BASE_URL}${url}?`;
-  const options = {};
-  if (
-    typeof args[0] === 'object' &&
-    !Array.isArray(args[0]) &&
-    args.length === 1
-  ) {
-    const queries = args[0];
-    for (const query in queries) url += `&${query}=${queries[query]}`;
-  } else if (
-    typeof args[0] !== 'object' || (
-      Array.isArray(args[0]) &&
-      args.length === 1
-    )
-  ) throw new TypeError('GET request queries must be an object of the form { query: value }');
-  else if (args.length > 1) {
-    const method = args[0];
-    const body = JSON.stringify(args[1]);
-    const headers = args[2];
-    setHeaders(headers);
-    options.method = method;
-    options.body = body;
-    options.headers = headers;
-  }
-  return await (await window.fetch(url, options)).json();
-};
+import { SetErrors } from './errors';
 
 export default {
-  async get (url, queries = {}) {
-    return await (async () => validateContext(this) &&
-      await wrappedFetch(url, queries))();
-  },
-  async post (url, body, headers = {}) {
-    return await (async () => validateContext(this) &&
-      await wrappedFetch(url, 'POST', body, headers))();
-  },
-  async put (url, body, headers = {}) {
-    return await (async () => validateContext(this) &&
-      await wrappedFetch(url, 'PUT', body, headers))();
-  },
-  async patch (url, body, headers = {}) {
-    return await (async () => validateContext(this) &&
-      await wrappedFetch(url, 'PATCH', body, headers))();
-  },
-  async delete (url, body, headers = {}) {
-    return await (async () => validateContext(this) &&
-      await wrappedFetch(url, 'DELETE', body, headers))();
-  }
-};
+  options: [
+    '',
+    {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: '',
+      method: ''
+    }
+  ],
 
-export const restoreCSRF = async () => {
-  try {
-    const res = await window.fetch(`${REACT_NATIVE_BASE_URL}/api/csrf/restore`);
-    const { token } = await res.json();
-    await AsyncStorage.setItem('token', token);
-  } catch (err) {
-    await AsyncStorage.setItem('token', '');
+  genericErrors: ['Sorry, something went wrong. Please refresh the page and try again.'],
+
+  captureDispatch (dispatch) {
+    this.dispatch = dispatch;
+  },
+
+  async __preFlight (opts = { url: '', params: null, body: null }, method) {
+    this.options[1].headers['XSRF-Token'] = await AsyncStorage.getItem('token');
+    if (method === 'GET') delete this.options[1].body;
+    this.options[0] = opts.url;
+    this.options[1] = { ...this.options[1], method };
+    this.options[0][this.options[0].length - 1] !== '/' && (this.options[0] = `${opts.url}/`);
+    if (opts.params) {
+      opts.url += '?';
+      for (const key in opts.params) opts.url += `&${key}=${opts.params[key]}`;
+    }
+    if (opts.body) this.options[1].body = JSON.stringify(opts.body);
+  },
+
+  async __forwardFetch (opts = { url: '', params: null, body: null }, method = 'GET') {
+    await this.__preFlight(opts, method);
+    const res = await window.fetch(...this.options);
+    try {
+      if (res.status > 400) throw await res.json();
+      return await res.json();
+    } catch ({ errors }) {
+      this.dispatch(SetErrors(errors || this.genericErrors));
+      return {};
+    }
+  },
+
+  async get (url, params) {
+    return await this.__forwardFetch({ url, params });
+  },
+
+  async post (url, body) {
+    return await this.__forwardFetch({ url, body }, 'POST');
+  },
+
+  async patch (url, body) {
+    return await this.__forwardFetch({ url, body }, 'PATCH');
+  },
+
+  async delete (url, body) {
+    return await this.__forwardFetch({ url, body }, 'DELETE');
+  },
+
+  async restoreCSRF () {
+    const { token } = await this.get(`${REACT_NATIVE_BASE_URL}/api/csrf/restore`);
+    await AsyncStorage.setItem('token', token || '');
   }
 };
